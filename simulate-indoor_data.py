@@ -54,3 +54,4 @@ normal_data['label'] = 0  # Normal data label
 # Print the first few rows of the DataFrame
 print(normal_data.head())
 print(f"Total data points generated: {len(normal_data)}")
+normal_data.to_csv('indoor_data.csv', index=False)
