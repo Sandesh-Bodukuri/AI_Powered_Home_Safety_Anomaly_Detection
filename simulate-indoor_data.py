@@ -7,7 +7,7 @@ start_time = datetime(2025, 4, 12, 21, 24, 0)  # Starting time
 end_time = start_time + timedelta(hours=24)  # 24 hours later
 
 # Generate timestamps at 5-minute intervals
-timestamps = pd.date_range(start=start_time, end=end_time, freq='5 min', inclusive='left')  # Exclude the last point
+timestamps = pd.date_range(start=start_time, end=end_time, freq='5 min', inclusive='left')  # Exclude the last timestamp to ensure 288 points
 timestamps_list = timestamps.tolist()
 
 # Define ranges for temperature, humidity, and light
@@ -16,7 +16,7 @@ normal_humidity_range = (30, 60)
 normal_light_day_range = (300, 800)
 normal_light_night_range = (50, 150)
 
-# Define typical day/night hours (adjust as needed for Hyderabad)
+# Define typical day/night hours 
 day_start_hour = 6
 day_end_hour = 18
 
@@ -54,6 +54,7 @@ normal_data['label'] = 0  # Normal data label
 # Print the first few rows of the DataFrame
 print(normal_data.head())
 print(f"Total data points generated: {len(normal_data)}")
+# Save the normal data to a CSV file
 normal_data.to_csv('indoor_data.csv', index=False)
 
 
@@ -101,9 +102,9 @@ else:
 
 # 3. Unexpected Fluctuations in Illumination (Faulty Wiring Simulation at Night)
 anomaly_times_light = [
-    datetime(2025, 4, 13, 19, 4, 0),  # 7:04 PM
-    datetime(2025, 4, 13, 20, 34, 0),  # 8:34 PM
-    datetime(2025, 4, 13, 21, 14, 0)   # 9:14 PM
+    datetime(2025, 4, 13, 19, 4, 0),  
+    datetime(2025, 4, 13, 20, 34, 0),  
+    datetime(2025, 4, 13, 21, 14, 0)
 ]
 
 for anomaly_time in anomaly_times_light:
