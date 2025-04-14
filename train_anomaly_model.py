@@ -64,23 +64,3 @@ print(confusion_matrix(y_test, y_pred))
 
 print("\nClassification Report:")
 print(classification_report(y_test, y_pred, target_names=['Normal', 'Anomaly']))
-
-
-from sklearn.ensemble import IsolationForest
-
-# Train the Isolation Forest model
-iso_forest = IsolationForest(n_estimators=200, contamination=0.06, random_state=42)  
-iso_forest.fit(X_train_scaled)
-
-# Predict on the test set
-y_pred_iso = iso_forest.predict(X_test_scaled)
-
-# Convert predictions to match the labels (1 for anomaly, 0 for normal)
-y_pred_iso = [0 if pred == 1 else 1 for pred in y_pred_iso]  # Isolation Forest outputs 1 for inliers and -1 for outliers
-
-# Evaluate the model
-print("\nConfusion Matrix (Isolation Forest):")
-print(confusion_matrix(y_test, y_pred_iso))
-
-print("\nClassification Report (Isolation Forest):")
-print(classification_report(y_test, y_pred_iso, target_names=['Normal', 'Anomaly']))
