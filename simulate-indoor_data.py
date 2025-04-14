@@ -55,7 +55,7 @@ normal_data['label'] = 0  # Normal data label
 print(normal_data.head())
 print(f"Total data points generated: {len(normal_data)}")
 # Save the normal data to a CSV file
-normal_data.to_csv('indoor_data.csv', index=False)
+normal_data.to_csv('normal_data.csv', index=False)
 
 
 # --- Anomaly Injection Logic Below ---
