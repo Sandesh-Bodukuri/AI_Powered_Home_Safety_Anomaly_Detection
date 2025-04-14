@@ -44,3 +44,23 @@ print("\nFirst few rows of X_test:")
 print(X_test.head())
 print("\nFirst few rows of y_test:")
 print(y_test.head())
+
+from sklearn.svm import OneClassSVM
+from sklearn.metrics import classification_report, confusion_matrix
+
+# Train the One-Class SVM model
+ocsvm = OneClassSVM(kernel='rbf', gamma='auto', nu=0.01)  
+ocsvm.fit(X_train_scaled)
+
+# Predict on the test set
+y_pred = ocsvm.predict(X_test_scaled)
+
+# Convert predictions to match the labels (1 for anomaly, 0 for normal)
+y_pred = [0 if pred == 1 else 1 for pred in y_pred]  # One-Class SVM outputs 1 for inliers and -1 for outliers
+
+# Evaluate the model
+print("\nConfusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
+
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred, target_names=['Normal', 'Anomaly']))
