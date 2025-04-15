@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home Sensor Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Home Sensor Data</h1>
+
+    <div>
+        <canvas id="temperatureChart" width="800" height="300"></canvas>
+    </div>
+    <div>
+        <canvas id="humidityChart" width="800" height="300"></canvas>
+    </div>
+    <div>
+        <canvas id="lightChart" width="800" height="300"></canvas>
+    </div>
+
+    <script>
+        const sensorData = {{ sensor_data|tojson }};
+
+        const timestamps = sensorData.map(item => item.timestamp);
+        const temperatures = sensorData.map(item => item.temperature);
+        const humidities = sensorData.map(item => item.humidity);
+        const lightLevels = sensorData.map(item => item.light);
+        const anomalies = sensorData.map(item => item.label);
+
+        const specificHumidityAnomalyTimestamps = [
+            "2025-04-13 09:04:00",
+            "2025-04-13 09:09:00",
+            "2025-04-13 09:14:00",
+            "2025-04-13 09:19:00"
+        ];
+
+        const specificTemperatureAnomalyTimestamps = [
+            "2025-04-13 15:04:00", "2025-04-13 15:09:00", "2025-04-13 15:14:00", "2025-04-13 15:19:00",
+            "2025-04-13 15:24:00", "2025-04-13 15:29:00", "2025-04-13 15:34:00", "2025-04-13 15:39:00",
+            "2025-04-13 15:44:00", "2025-04-13 15:49:00", "2025-04-13 15:54:00", "2025-04-13 15:59:00",
+            "2025-04-13 16:04:00", "2025-04-13 16:09:00", "2025-04-13 16:14:00", "2025-04-13 16:19:00",
+            "2025-04-13 16:24:00", "2025-04-13 16:29:00", "2025-04-13 16:34:00", "2025-04-13 16:39:00",
+            "2025-04-13 16:44:00", "2025-04-13 16:49:00", "2025-04-13 16:54:00", "2025-04-13 16:59:00",
+            "2025-04-13 17:04:00", "2025-04-13 17:09:00", "2025-04-13 17:14:00", "2025-04-13 17:19:00",
+            "2025-04-13 17:24:00", "2025-04-13 17:29:00", "2025-04-13 17:34:00"
+        ];
+
+        const specificLightAnomalyTimestamps = [
+            "2025-04-13 19:04:00", "2025-04-13 19:09:00", "2025-04-13 19:14:00", "2025-04-13 19:19:00",
+            "2025-04-13 19:24:00", "2025-04-13 20:34:00", "2025-04-13 20:39:00", "2025-04-13 20:44:00",
+            "2025-04-13 20:49:00", "2025-04-13 20:54:00", "2025-04-13 21:14:00", "2025-04-13 21:19:00"
+        ];
+
+
+        function createChart(canvasId, labels, data, label, borderColor, backgroundColor, anomalyData, specificAnomalyTimestamps = []) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            const anomalyIndices = anomalyData.reduce((acc, val, index) => {
+                if (val === 1) {
+                    acc.push(index);
+                }
+                return acc;
+            }, []);
+
+            const pointRadii = labels.map((timestamp, index) => anomalyIndices.includes(index) ? 6 : 3);
+            const pointStyles = labels.map((_, index) => 'circle');
+            const pointHoverRadii = labels.map((_, index) => anomalyIndices.includes(index) ? 8 : 5);
+
+            const pointBackgroundColors = labels.map((timestamp, index) => {
+                const isSpecificAnomaly = specificAnomalyTimestamps.some(anomalyTime => timestamp.startsWith(anomalyTime));
+                if (
+                    (canvasId === 'humidityChart' && isSpecificAnomaly) ||
+                    (canvasId === 'temperatureChart' && isSpecificAnomaly) ||
+                    (canvasId === 'lightChart' && isSpecificAnomaly)
+                ) {
+                    return 'rgba(255, 0, 0, 1)'; // Red for specific anomalies
+                } else if (anomalyIndices.includes(index)) {
+                    return 'rgba(0, 255, 0, 1)'; // Green for other anomalies
+                }
+                return backgroundColor;
+            });
+
+            const pointBorderColors = labels.map((timestamp, index) => {
+                const isSpecificAnomaly = specificAnomalyTimestamps.some(anomalyTime => timestamp.startsWith(anomalyTime));
+                if (
+                    (canvasId === 'humidityChart' && isSpecificAnomaly) ||
+                    (canvasId === 'temperatureChart' && isSpecificAnomaly) ||
+                    (canvasId === 'lightChart' && isSpecificAnomaly)
+                ) {
+                    return 'rgba(255, 0, 0, 1)'; // Red border for specific anomalies
+                } else if (anomalyIndices.includes(index)) {
+                    return 'rgba(0, 255, 0, 1)'; // Green border for other anomalies
+                }
+                return borderColor;
+            });
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: data,
+                        borderColor: borderColor,
+                        backgroundColor: backgroundColor,
+                        fill: false,
+                        pointRadius: pointRadii,
+                        pointBackgroundColor: pointBackgroundColors,
+                        pointBorderColor: pointBorderColors,
+                        pointStyle: pointStyles,
+                        pointHoverRadius: pointHoverRadii
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        createChart('temperatureChart', timestamps, temperatures, 'Temperature (°C)', 'rgba(255, 99, 132, 1)', 'rgba(255, 99, 132, 0.2)', anomalies, specificTemperatureAnomalyTimestamps);
+        createChart('humidityChart', timestamps, humidities, 'Humidity (%)', 'rgba(54, 162, 235, 1)', 'rgba(54, 162, 235, 0.2)', anomalies, specificHumidityAnomalyTimestamps);
+        createChart('lightChart', timestamps, lightLevels, 'Light (lux)', 'rgba(255, 206, 86, 1)', 'rgba(255, 206, 86, 0.2)', anomalies, specificLightAnomalyTimestamps);
+    </script>
+
+</body>
+</html>
