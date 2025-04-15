@@ -2,6 +2,9 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import numpy as np
+from sklearn.svm import OneClassSVM
+from sklearn.metrics import classification_report, confusion_matrix
+import pickle
 
 # Load the simulated data from a CSV file
 normal_data = pd.read_csv('c:/Users/0913S/OneDrive/Documents/Project-0/indoor_data_with_anomalies.csv')
@@ -36,17 +39,6 @@ print("Shape of X_train (Normal Data for Training):", X_train.shape)
 print("Shape of X_val (Validation Data):", X_val.shape)
 print("Shape of X_test (All Data for Testing):", X_test.shape)
 print("Shape of y_test (Labels for All Data):", y_test.shape)
-print("\nFirst few rows of X_train:")
-print(X_train.head())
-print("\nFirst few rows of X_val:")
-print(X_val.head())
-print("\nFirst few rows of X_test:")
-print(X_test.head())
-print("\nFirst few rows of y_test:")
-print(y_test.head())
-
-from sklearn.svm import OneClassSVM
-from sklearn.metrics import classification_report, confusion_matrix
 
 # Train the One-Class SVM model
 ocsvm = OneClassSVM(kernel='rbf', gamma='auto', nu=0.01)  
@@ -64,3 +56,13 @@ print(confusion_matrix(y_test, y_pred))
 
 print("\nClassification Report:")
 print(classification_report(y_test, y_pred, target_names=['Normal', 'Anomaly']))
+
+# Save the trained One-Class SVM model
+with open('anomaly_model.pkl', 'wb') as model_file:
+    pickle.dump(ocsvm, model_file)
+print("Model saved successfully as 'anomaly_model.pkl'.")
+
+# Save the scaler
+with open('scaler.pkl', 'wb') as scaler_file:
+    pickle.dump(scaler, scaler_file)
+print("Scaler saved successfully as 'scaler.pkl'.")
